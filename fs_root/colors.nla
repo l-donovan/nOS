@@ -1,0 +1,7 @@
+color_prompt: chr 0x1b 0x5b '38;5;'
+color_prompt_fg: chr '12'
+chr 'm' 0x1b 0x5b '48;5;'
+color_prompt_bg: chr '  ';
+chr 'm' 0x00
+
+clear_prompt: chr 0x1b 0x5b '39m' 0x1b 0x5b '49m' 0x00

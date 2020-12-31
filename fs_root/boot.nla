@@ -1,0 +1,115 @@
+inc 'constants.nla'
+inc 'colors.nla'
+inc 'int_to_str.nla'
+
+# Reserve 32 bytes for input
+input: res 32
+input_ptr: nop
+
+# Print boot-up art
+mov r2 0x01 # r2 holds the value corresponding to the system call to execute. 0x01 is write
+mov r3 msg  # r3 holds the address of the start of the characters to print
+mov r4 r0   # If r4 is the number of characters to print. If zero, print until null
+sys         # sys uses the values in the registers to execute a system call
+
+command_loop: nop
+    # Initialize r5 to 31 (Gotta leave space for the null terminator)
+    mov r5 31
+
+    # input_ptr = input
+    ptr input_ptr input[0] r0
+
+    # Print the prompt
+    mov r2 0x01
+    mov r3 color_prompt
+    mov r4 r0
+    sys
+
+    mov r3 prompt
+    sys
+
+    mov r3 clear_prompt
+    sys
+
+    getch_loop: nop
+        # Read a character
+        mov r2 0x00 # 0x00 is read
+        xor r3 r3   # r3 is used by the sys to hold the value of the character read
+        xor r4 r4   # Unused
+        sys
+
+        # If we get a ctrl-c, exit immediately
+        eql r6 r3 0x03
+        jmp r6 exit
+
+        # Stop reading if the character is a CR
+        eql r6 r3 0x0d
+        jmp r6 after_loop
+
+        # There is some complicated logic to handle a backspace
+        eql r6 r3 0x7f
+        jmp r6 handle_backspace
+
+        # Write r3 to input_ptr
+        mem input_ptr r3
+
+        # Print character
+        mov r2 0x01
+        mov r3 input_ptr
+        mov r4 r1
+        sys
+
+        # Decrement r5
+        add r5 r5 -1
+
+        # Increment input_ptr. input_ptr = input_ptr[1]
+        ptr input_ptr input_ptr[1] r0
+
+        # Jump back up to input_loop if r5 > 0
+        jmp r5 getch_loop
+
+    after_loop: nop
+
+    # Make sure to null-terminate our input
+    mem input_ptr r0
+
+    # Print a newline
+    mov r2 0x01
+    mov r3 newline
+    mov r4 r1
+    sys
+
+    # Execute our input
+    exc input
+
+    # Repeat the command loop
+    jmp r1 command_loop
+
+handle_backspace: nop
+    # If the input is empty, do nothing
+    eql r6 r5 31
+    jmp r6 getch_loop
+
+    # Print the backspace sequence
+    mov r2 0x01
+    mov r3 backspace
+    mov r4 r0
+    sys
+
+    # Move the input pointer back and set that character to null
+    ptr input_ptr input_ptr[-1] r0
+    mem input_ptr r0
+
+    # We now have one more available character
+    add r5 r5 1
+
+    # Read the next character
+    jmp r1 getch_loop
+
+# Somewhere to jump to if we want to escape the command loop
+exit: nop
+    # Print goodbye message
+    mov r2 0x01
+    mov r3 goodbye
+    mov r4 r0
+    sys

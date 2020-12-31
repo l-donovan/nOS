@@ -1,0 +1,49 @@
+mov r6 12345
+
+int_to_str: res 13
+
+swp int_to_str
+
+mem r6 int_to_str[4]
+
+s: res 10
+s_ptr: nop
+e_ptr: nop
+mov r7 0
+
+ptr s_ptr s[0] r0
+
+loop1: nop
+    mod r5 r6 10
+    add r5 r5 0x30
+    mem s_ptr r5
+    div r6 r6 10
+    add r7 r7 1
+    ptr s_ptr s_ptr[1] r0
+    jmp r6 loop1
+
+mov r6 0
+ptr s_ptr s[0] r0
+ptr e_ptr s[-1] r7
+div r7 r7 2
+
+loop2: nop
+    mem r5 e_ptr
+    mem e_ptr s_ptr
+    mem s_ptr r5
+    add r6 r6 1
+    ptr s_ptr s_ptr[1] r0
+    ptr e_ptr e_ptr[-1] r0
+    sub r5 r7 r6
+    jmp r5 loop2
+
+mov r2 0x01
+mov r3 s
+mov r4 10
+sys
+
+mov r3 newline
+mov r4 1
+sys
+
+swp int_to_str

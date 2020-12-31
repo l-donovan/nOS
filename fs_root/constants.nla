@@ -1,0 +1,17 @@
+# Define boot-up art
+msg: chr '  v0.0.1  ____  _____' 0x0a
+     chr '   ____  / __ \/ ___/' 0x0a
+     chr '  / __ \/ / / /\__ \ ' 0x0a
+     chr ' / / / / /_/ /___/ / ' 0x0a
+     chr '/_/ /_/\____//____/  ' 0x0a 0x0a 0x00
+
+goodbye: chr 'Goodbye!' 0x0a 0x00
+
+# Define newline for convenience
+newline: chr 0x0a
+
+# Define prompt
+prompt: chr '$ ' 0x00
+
+# This mess moves the character back one column, prints a space, then moves it back again
+backspace: chr 0x1b 0x5b 'D ' 0x1b 0x5b 'D' 0x00
